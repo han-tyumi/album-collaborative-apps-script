@@ -1,5 +1,8 @@
 import { Album } from './album';
 
+/**
+ * @todo Move to custom @types files plus additions made to the Apps Script types.
+ */
 interface SheetsFormSubmitEvent {
   authMode: GoogleAppsScript.Script.AuthMode;
   namedValues: { [key: string]: string[] };
@@ -13,10 +16,10 @@ interface SheetsFormSubmitEvent {
  * when the spreadsheet is opened. This function is called through a built-in apps-script trigger.
  */
 function onOpen() {
-  // create menu within Spreadsheet
+  // Create menu within Spreadsheet.
   createMenu();
 
-  // calculate Summary sheet
+  // Calculate Summary sheet.
   calculate();
 }
 
@@ -46,39 +49,40 @@ function createMenu() {
  * The album is also added to the Summary sheet.
  * @param submitter The name of the submitter of the album.
  */
-async function newAlbum(submitter?: string) {
+function newAlbum(submitter?: string) {
   const album = new Album();
 
-  // prompt the user for the album's info
+  // Prompt the user for the album's info.
   if (!album.prompt(submitter)) {
     return;
   }
 
-  // create the form
+  // Create the form and format its sheet.
   const form = createForm(album);
 
-  // format the newly created form sheet
-  formatFormSheet(album);
-
-  // add the album to the Summary sheet and calculate it
+  // Add the album to the Summary sheet and calculate it.
   addToSummarySheet(album, form);
+
+  // Add the album to the Current Album sheet.
+  addToCurrentAlbumSheet(album, form);
 }
 
 /**
- * Creates a new form for the specified album.
+ * Creates a new form for the specified album and formats the created sheet.
  * @param album The album to create a form for.
+ * @returns The created form.
  */
 function createForm(album: Album): GoogleAppsScript.Forms.Form {
   const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
   const form = FormApp.create(album.formattedName);
 
-  // create a new form for the album
+  // Create a new form for the album.
   form
     .addScaleItem()
     .setTitle('Authentic')
     .setHelpText(
-      `The emotions have to be real, genuine and truthful.
-      The prime objective should be to create good music for the sake of the music itself.`,
+      `Emotions are real, genuine and truthful; creating good music for the sake of the music
+ itself.`,
     )
     .setBounds(1, 5)
     .setRequired(true)
@@ -86,30 +90,29 @@ function createForm(album: Album): GoogleAppsScript.Forms.Form {
     .duplicate()
     .setTitle('Adventurous')
     .setHelpText(
-      `The artist/band should be looking for new ways to express what they feel and have to
-      communicate. The surprise element, the creativity, the musical vision are part of the
-      adventure.`,
+      `The artist/band looks for new ways to express what they feel and have to communicate;
+ the surprise element, the creativity, the musical vision.`,
     )
 
     .duplicate()
     .setTitle('Accurate')
     .setHelpText(
-      `A "Yes, that's it!" reaction. A sublime translation of feelings through the skills and
-      mastery of a instrument.`,
+      `A "Yes, that's it!" reaction; the translation of feelings through the mastery of an
+ instrument.`,
     )
 
     .duplicate()
     .setTitle('Artistic')
     .setHelpText(
-      `The more cerebral aspect of music. Some concept which leads to structure, balance, length,
-      interplay, selection of instruments, of musicians, of new approaches.`,
+      `The more cerebral aspect of music; a concept which leads to structure, balance, length,
+ interplay, selection of instruments, etc.`,
     )
 
     .duplicate()
     .setTitle('Attention-grabbing')
     .setHelpText(
-      `Though music can and should require an effort from the listener, it should also include a
-      factor of entertainment. In the sense of keeping the attention going, of being captivating.`,
+      `Music should require some effort from the listener, but it should also include a
+ factor of entertainment; keeps the listener's attention.`,
     );
 
   form
@@ -126,11 +129,10 @@ function createForm(album: Album): GoogleAppsScript.Forms.Form {
     .setTitle('Analysis')
     .setRequired(true)
     .setValidation(
-      FormApp.createParagraphTextValidation().requireTextLengthGreaterThanOrEqualTo(
-        500,
-      ),
-    )
-    .setHelpText('Your analysis must be at least 500 characters long.');
+      FormApp.createParagraphTextValidation()
+        .requireTextLengthGreaterThanOrEqualTo(500)
+        .build(),
+    );
 
   form
     .setAllowResponseEdits(true)
@@ -138,6 +140,9 @@ function createForm(album: Album): GoogleAppsScript.Forms.Form {
     .setDestination(FormApp.DestinationType.SPREADSHEET, spreadsheet.getId())
     .setLimitOneResponsePerUser(true)
     .setPublishingSummary(true);
+
+  // Format the newly created form sheet.
+  formatFormSheet(album);
 
   return form;
 }
@@ -147,14 +152,14 @@ function createForm(album: Album): GoogleAppsScript.Forms.Form {
  * @param album The album used to create the form.
  */
 function formatFormSheet(album: Album) {
+  // Make sure the subsequently created form has been added to the spreadsheet before we begin.
+  SpreadsheetApp.flush();
+
   const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
   const sheets = spreadsheet.getSheets();
   const sheet = sheets[0];
 
-  // make sure the subsequently created form has been added to the spreadsheet
-  SpreadsheetApp.flush();
-
-  // format sheet
+  // Format the sheet.
   sheet
     .activate()
     .setName(album.formattedName)
@@ -190,7 +195,7 @@ function formatFormSheet(album: Album) {
 
   sheet.getRange('A:A').setNumberFormat('mmmm d, yyyy');
 
-  // move sheet to end
+  // Move sheet to end.
   spreadsheet.moveActiveSheet(sheets.length);
 }
 
@@ -201,11 +206,11 @@ function formatFormSheet(album: Album) {
  */
 function addToSummarySheet(album: Album, form: GoogleAppsScript.Forms.Form) {
   const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-  const summary = spreadsheet.getSheetByName('Summary');
+  const summarySheet = spreadsheet.getSheetByName('Summary');
   const timestamp = new Date();
 
-  // add new row with album/form data
-  summary
+  // Add new row with album/form data.
+  summarySheet
     .activate()
     .appendRow([
       timestamp,
@@ -213,12 +218,39 @@ function addToSummarySheet(album: Album, form: GoogleAppsScript.Forms.Form) {
       album.artist,
       album.submitter,
       form.shortenFormUrl(form.getPublishedUrl()),
+      album.spotifyUrl,
     ])
-    .getRange(summary.getLastRow(), 1)
+    .getRange(summarySheet.getLastRow(), 1)
     .setNumberFormat('mmmm d, yyyy');
 
-  // calculate the summary sheet
+  // Calculate the Summary sheet.
   calculate();
+}
+
+/**
+ * Adds an album and it's referenced form to the Current Album sheet.
+ * @param album The album to add to the Current Album sheet.
+ * @param form The form to reference with the Current Album sheet.
+ */
+function addToCurrentAlbumSheet(
+  album: Album,
+  form: GoogleAppsScript.Forms.Form,
+) {
+  const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  const currentAlbumSheet = spreadsheet.getSheetByName('Current Album');
+  const sheetRange = currentAlbumSheet.getRange('C2:C5');
+  const sheetValues = sheetRange.getValues();
+
+  currentAlbumSheet.activate();
+
+  sheetValues[0][0] = album.formattedName;
+  sheetValues[1][0] = album.submitter;
+  sheetValues[2][0] = form.shortenFormUrl(form.getPublishedUrl());
+  sheetValues[3][0] = album.spotifyUrl;
+
+  sheetRange.setValues(sheetValues);
+
+  currentAlbumSheet.autoResizeColumn(3);
 }
 
 /**
@@ -233,7 +265,7 @@ function submit(e: SheetsFormSubmitEvent) {
     return;
   }
 
-  // style the added range
+  // Style the added range.
   range
     .setBorder(true, true, true, true, true, true)
     .setFontSize(10)
@@ -246,18 +278,24 @@ function submit(e: SheetsFormSubmitEvent) {
 
   range.offset(0, 7, 1, 2).setHorizontalAlignment('left');
 
-  // calculate the Summary sheet
+  // Calculate the Summary sheet.
   calculate();
 }
 
 /**
  * Calculates the Summary sheet.
- * TODO: Pass in a value to specify which row to calculate.
+ * @todo Pass in a value to specify which row to calculate.
+ * @todo Make calculations more dynamic; less magic numbers.
  */
 function calculate() {
   const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-  const summary = spreadsheet.getSheetByName('Summary');
-  const sheetRange = summary.getRange(2, 2, summary.getLastRow() - 1, 11);
+  const summarySheet = spreadsheet.getSheetByName('Summary');
+  const sheetRange = summarySheet.getRange(
+    2,
+    2,
+    summarySheet.getLastRow() - 1,
+    summarySheet.getLastColumn() - 1,
+  );
   const sheetValues = sheetRange.getValues();
   let sheet;
   let count;
@@ -268,11 +306,11 @@ function calculate() {
     );
     count = sheet.getLastRow() - 1;
 
-    sheetValues[i][4] = count;
+    sheetValues[i][5] = count;
 
-    for (let j = 5; j < sheetValues[i].length; j += 1) {
+    for (let j = 6; j < sheetValues[i].length; j += 1) {
       sheetValues[i][j] =
-        count < 1 ? 'TBD' : getAverageForSheetColumn(sheet, count, j - 3);
+        count < 1 ? 'TBD' : getAverageForSheetColumn(sheet, count, j - 4);
     }
   }
 
@@ -289,7 +327,7 @@ function getAverageForSheetColumn(
   sheet: GoogleAppsScript.Spreadsheet.Sheet,
   count: number,
   column: number,
-) {
+): string {
   let values;
   let sum = 0;
 
@@ -302,7 +340,7 @@ function getAverageForSheetColumn(
 }
 
 /**
- * Generates a new order of submitter.
+ * Generates a new order of submitters.
  */
 function generate() {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(
@@ -345,7 +383,10 @@ function next() {
 
   for (i = 0; values[i][0] !== '->'; i += 1);
 
-  values[(i += 1)][0] = '';
+  console.log(i);
+
+  values[i][0] = '';
+  i += 1;
   if (i === values.length) {
     i = 0;
     generate();
@@ -373,7 +414,8 @@ function back() {
 
   for (i = 0; values[i][0] !== '->'; i += 1);
 
-  values[(i -= 1)][0] = '';
+  values[i][0] = '';
+  i -= 1;
   if (i < 0) {
     values[values.length - 1][0] = '->';
   } else {
