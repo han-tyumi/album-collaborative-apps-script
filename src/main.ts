@@ -58,13 +58,13 @@ function newAlbum(submitter?: string) {
   }
 
   // Create the form and format its sheet.
-  const form = createForm(album);
+  // const form = createForm(album);
 
-  // Add the album to the Summary sheet and calculate it.
-  addToSummarySheet(album, form);
+  // // Add the album to the Summary sheet and calculate it.
+  // addToSummarySheet(album, form);
 
-  // Add the album to the Current Album sheet.
-  addToCurrentAlbumSheet(album, form);
+  // // Add the album to the Current Album sheet.
+  // addToCurrentAlbumSheet(album, form);
 }
 
 /**
@@ -218,7 +218,7 @@ function addToSummarySheet(album: Album, form: GoogleAppsScript.Forms.Form) {
       album.artist,
       album.submitter,
       form.shortenFormUrl(form.getPublishedUrl()),
-      album.spotifyUrl,
+      album.spotifyUri,
     ])
     .getRange(summarySheet.getLastRow(), 1)
     .setNumberFormat('mmmm d, yyyy');
@@ -246,7 +246,7 @@ function addToCurrentAlbumSheet(
   sheetValues[0][0] = album.formattedName;
   sheetValues[1][0] = album.submitter;
   sheetValues[2][0] = form.shortenFormUrl(form.getPublishedUrl());
-  sheetValues[3][0] = album.spotifyUrl;
+  sheetValues[3][0] = album.spotifyUri;
 
   sheetRange.setValues(sheetValues);
 
