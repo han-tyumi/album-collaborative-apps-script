@@ -130,7 +130,6 @@ function createForm(album: Album): GoogleAppsScript.Forms.Form {
     .setRequired(true)
     .setValidation(
       FormApp.createParagraphTextValidation()
-        .requireTextLengthGreaterThanOrEqualTo(500)
         .build(),
     );
 
@@ -383,8 +382,6 @@ function next() {
 
   for (i = 0; values[i][0] !== '->'; i += 1);
 
-  console.log(i);
-
   values[i][0] = '';
   i += 1;
   if (i === values.length) {
@@ -395,10 +392,12 @@ function next() {
   values[i][0] = '->';
   range.setValues(values);
 
-  newAlbum(range
-    .offset(0, 2)
-    .getCell(i + 1, 1)
-    .getValue() as string);
+  newAlbum(
+    range
+      .offset(0, 2)
+      .getCell(i + 1, 1)
+      .getValue() as string,
+  );
 }
 
 /**
