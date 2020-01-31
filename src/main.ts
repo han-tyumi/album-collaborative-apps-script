@@ -127,8 +127,7 @@ function createForm(album: Album): GoogleAppsScript.Forms.Form {
 
     .duplicate()
     .setTitle('Analysis')
-    .setRequired(true)
-    .setValidation(FormApp.createParagraphTextValidation());
+    .setRequired(true);
 
   form
     .setAllowResponseEdits(true)
