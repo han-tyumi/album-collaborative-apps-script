@@ -16,7 +16,7 @@ export class Album {
     public artist: string = '',
     public submitter: string = '',
     public spotifyUri: string = '',
-    public spotifyUrl: string = '',
+    public spotifyUrl: string = ''
   ) {}
 
   /**
@@ -39,7 +39,7 @@ export class Album {
       property: keyof Pick<
         Album,
         'artist' | 'title' | 'submitter' | 'spotifyUri' | 'spotifyUrl'
-      >,
+      >
     ): boolean => {
       const response = ui.prompt('New Album', prompt, ui.ButtonSet.OK_CANCEL);
       if (response.getSelectedButton() === ui.Button.OK) {
@@ -61,7 +61,7 @@ export class Album {
       // Get album ID from Spotify URI.
       const albumId = this.spotifyUri.split(':').pop();
       const clientSecret = PropertiesService.getScriptProperties().getProperty(
-        'SpotifyClientSecret',
+        'SpotifyClientSecret'
       );
 
       if (albumId && clientSecret) {
@@ -70,23 +70,23 @@ export class Album {
           UrlFetchApp.fetch('https://accounts.spotify.com/api/token', {
             method: 'post',
             payload: {
-              grant_type: 'client_credentials',
+              grant_type: 'client_credentials'
             },
             headers: {
               Authorization: `Basic ${Utilities.base64EncodeWebSafe(
-                clientSecret,
-              )}`,
-            },
-          }).getContentText(),
+                clientSecret
+              )}`
+            }
+          }).getContentText()
         ).access_token;
 
         // Fetch the Spotify album object.
         const albumObject = JSON.parse(
           UrlFetchApp.fetch(`https://api.spotify.com/v1/albums/${albumId}`, {
             headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          }).getContentText(),
+              Authorization: `Bearer ${accessToken}`
+            }
+          }).getContentText()
         );
 
         // Set the title, artist, and URL using the album object.

@@ -39,7 +39,7 @@ function createMenu() {
         .addItem('Back', 'back')
         .addItem('Calculate', 'calculate')
         .addItem('Generate', 'generate')
-        .addItem('New Album', 'newAlbum'),
+        .addItem('New Album', 'newAlbum')
     )
     .addToUi();
 }
@@ -82,7 +82,7 @@ function createForm(album: Album): GoogleAppsScript.Forms.Form {
     .setTitle('Authentic')
     .setHelpText(
       `Emotions are real, genuine and truthful; creating good music for the sake of the music
- itself.`,
+ itself.`
     )
     .setBounds(1, 5)
     .setRequired(true)
@@ -91,28 +91,28 @@ function createForm(album: Album): GoogleAppsScript.Forms.Form {
     .setTitle('Adventurous')
     .setHelpText(
       `The artist/band looks for new ways to express what they feel and have to communicate;
- the surprise element, the creativity, the musical vision.`,
+ the surprise element, the creativity, the musical vision.`
     )
 
     .duplicate()
     .setTitle('Accurate')
     .setHelpText(
       `A "Yes, that's it!" reaction; the translation of feelings through the mastery of an
- instrument.`,
+ instrument.`
     )
 
     .duplicate()
     .setTitle('Artistic')
     .setHelpText(
       `The more cerebral aspect of music; a concept which leads to structure, balance, length,
- interplay, selection of instruments, etc.`,
+ interplay, selection of instruments, etc.`
     )
 
     .duplicate()
     .setTitle('Attention-grabbing')
     .setHelpText(
       `Music should require some effort from the listener, but it should also include a
- factor of entertainment; keeps the listener's attention.`,
+ factor of entertainment; keeps the listener's attention.`
     );
 
   form
@@ -128,10 +128,7 @@ function createForm(album: Album): GoogleAppsScript.Forms.Form {
     .duplicate()
     .setTitle('Analysis')
     .setRequired(true)
-    .setValidation(
-      FormApp.createParagraphTextValidation()
-        .build(),
-    );
+    .setValidation(FormApp.createParagraphTextValidation().build());
 
   form
     .setAllowResponseEdits(true)
@@ -186,7 +183,7 @@ function formatFormSheet(album: Album) {
       null,
       null,
       null,
-      SpreadsheetApp.BorderStyle.DOUBLE,
+      SpreadsheetApp.BorderStyle.DOUBLE
     )
     .setFontSize(11)
     .setFontWeight('bold')
@@ -217,7 +214,7 @@ function addToSummarySheet(album: Album, form: GoogleAppsScript.Forms.Form) {
       album.artist,
       album.submitter,
       form.shortenFormUrl(form.getPublishedUrl()),
-      album.spotifyUrl,
+      album.spotifyUrl
     ])
     .getRange(summarySheet.getLastRow(), 1)
     .setNumberFormat('mmmm d, yyyy');
@@ -233,7 +230,7 @@ function addToSummarySheet(album: Album, form: GoogleAppsScript.Forms.Form) {
  */
 function addToCurrentAlbumSheet(
   album: Album,
-  form: GoogleAppsScript.Forms.Form,
+  form: GoogleAppsScript.Forms.Form
 ) {
   const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
   const currentAlbumSheet = spreadsheet.getSheetByName('Current Album');
@@ -293,7 +290,7 @@ function calculate() {
     2,
     2,
     summarySheet.getLastRow() - 1,
-    summarySheet.getLastColumn() - 1,
+    summarySheet.getLastColumn() - 1
   );
   const sheetValues = sheetRange.getValues();
   let sheet;
@@ -301,7 +298,7 @@ function calculate() {
 
   for (let i = 0; i < sheetValues.length; i += 1) {
     sheet = spreadsheet.getSheetByName(
-      `${sheetValues[i][0]} — ${sheetValues[i][1]}`,
+      `${sheetValues[i][0]} — ${sheetValues[i][1]}`
     );
     count = sheet.getLastRow() - 1;
 
@@ -325,7 +322,7 @@ function calculate() {
 function getAverageForSheetColumn(
   sheet: GoogleAppsScript.Spreadsheet.Sheet,
   count: number,
-  column: number,
+  column: number
 ): string {
   let values;
   let sum = 0;
@@ -343,7 +340,7 @@ function getAverageForSheetColumn(
  */
 function generate() {
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(
-    'Schedule',
+    'Schedule'
   );
   const namesRange = sheet.getRange('D2:D8');
   const names = namesRange.getValues();
@@ -352,7 +349,7 @@ function generate() {
   const response = ui.alert(
     'Generate',
     'Generate a new order?',
-    ui.ButtonSet.YES_NO,
+    ui.ButtonSet.YES_NO
   );
 
   if (response !== ui.Button.YES) {
@@ -396,7 +393,7 @@ function next() {
     range
       .offset(0, 2)
       .getCell(i + 1, 1)
-      .getValue() as string,
+      .getValue() as string
   );
 }
 
