@@ -16,7 +16,8 @@ export class Album {
     public artist: string = '',
     public submitter: string = '',
     public spotifyUri: string = '',
-    public spotifyUrl: string = ''
+    public spotifyUrl: string = '',
+    public dueDate: string = ''
   ) {}
 
   /**
@@ -31,14 +32,19 @@ export class Album {
    * @param submitter The name of the submitter of the album.
    * @returns Whether or not all data was retrieved.
    */
-  public prompt(submitter?: string): boolean {
+  public promptForInfo(submitter?: string): boolean {
     const ui = SpreadsheetApp.getUi();
 
     const prompt = (
       message: string,
       property: keyof Pick<
         Album,
-        'artist' | 'title' | 'submitter' | 'spotifyUri' | 'spotifyUrl'
+        | 'artist'
+        | 'title'
+        | 'submitter'
+        | 'spotifyUri'
+        | 'spotifyUrl'
+        | 'dueDate'
       >
     ): boolean => {
       const response = ui.prompt('New Album', message, ui.ButtonSet.OK_CANCEL);
@@ -93,22 +99,37 @@ export class Album {
         this.title = albumObject.name;
         this.artist = albumObject.artists[0].name;
         this.spotifyUrl = albumObject.external_urls.spotify;
+      } else {
+        ui.alert('Unable to fetch album data.');
 
-        return true;
+        if (!prompt("Enter the album's title.", 'title')) {
+          return false;
+        }
+
+        if (!prompt("Enter the album's artist.", 'artist')) {
+          return false;
+        }
+
+        if (!prompt("Enter the album's Spotify URL.", 'spotifyUrl')) {
+          return false;
+        }
       }
-      ui.alert('Unable to fetch album data.');
     }
 
-    if (!prompt("Enter the album's title.", 'title')) {
+    if (
+      !prompt(
+        'Enter the due date for reviews. Leave blank to default to 2 weeks from today.',
+        'dueDate'
+      )
+    ) {
       return false;
-    }
-
-    if (!prompt("Enter the album's artist.", 'artist')) {
-      return false;
-    }
-
-    if (!prompt("Enter the album's Spotify URL.", 'spotifyUrl')) {
-      return false;
+    } else if (!this.dueDate) {
+      const date = new Date();
+      date.setDate(date.getDate() + 14);
+      this.dueDate = `${date.getMonth() + 1}/${date.getDate()}/${date
+        .getFullYear()
+        .toString()
+        .slice(2)}`;
     }
 
     return true;

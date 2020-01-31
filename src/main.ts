@@ -53,7 +53,7 @@ function newAlbum(submitter?: string) {
   const album = new Album();
 
   // Prompt the user for the album's info.
-  if (!album.prompt(submitter)) {
+  if (!album.promptForInfo(submitter)) {
     return;
   }
 
@@ -237,15 +237,16 @@ function addToCurrentAlbumSheet(
   const currentAlbumSheet =
     spreadsheet.getSheetByName('Current Album') ||
     spreadsheet.insertSheet('Current Album');
-  const sheetRange = currentAlbumSheet.getRange('C2:C5');
+  const sheetRange = currentAlbumSheet.getRange('C2:C6');
   const sheetValues = sheetRange.getValues();
 
   currentAlbumSheet.activate();
 
   sheetValues[0][0] = album.formattedName;
   sheetValues[1][0] = album.submitter;
-  sheetValues[2][0] = form.shortenFormUrl(form.getPublishedUrl());
-  sheetValues[3][0] = album.spotifyUrl;
+  sheetValues[2][0] = album.dueDate;
+  sheetValues[3][0] = form.shortenFormUrl(form.getPublishedUrl());
+  sheetValues[4][0] = album.spotifyUrl;
 
   sheetRange.setValues(sheetValues);
 
