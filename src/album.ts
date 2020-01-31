@@ -35,13 +35,13 @@ export class Album {
     const ui = SpreadsheetApp.getUi();
 
     const prompt = (
-      prompt: string,
+      message: string,
       property: keyof Pick<
         Album,
         'artist' | 'title' | 'submitter' | 'spotifyUri' | 'spotifyUrl'
       >
     ): boolean => {
-      const response = ui.prompt('New Album', prompt, ui.ButtonSet.OK_CANCEL);
+      const response = ui.prompt('New Album', message, ui.ButtonSet.OK_CANCEL);
       if (response.getSelectedButton() === ui.Button.OK) {
         this[property] = response.getResponseText();
         return true;

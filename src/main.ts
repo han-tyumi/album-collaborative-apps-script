@@ -128,7 +128,7 @@ function createForm(album: Album): GoogleAppsScript.Forms.Form {
     .duplicate()
     .setTitle('Analysis')
     .setRequired(true)
-    .setValidation(FormApp.createParagraphTextValidation().build());
+    .setValidation(FormApp.createParagraphTextValidation());
 
   form
     .setAllowResponseEdits(true)
@@ -202,7 +202,8 @@ function formatFormSheet(album: Album) {
  */
 function addToSummarySheet(album: Album, form: GoogleAppsScript.Forms.Form) {
   const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-  const summarySheet = spreadsheet.getSheetByName('Summary');
+  const summarySheet =
+    spreadsheet.getSheetByName('Summary') || spreadsheet.insertSheet('Summary');
   const timestamp = new Date();
 
   // Add new row with album/form data.
@@ -233,7 +234,9 @@ function addToCurrentAlbumSheet(
   form: GoogleAppsScript.Forms.Form
 ) {
   const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-  const currentAlbumSheet = spreadsheet.getSheetByName('Current Album');
+  const currentAlbumSheet =
+    spreadsheet.getSheetByName('Current Album') ||
+    spreadsheet.insertSheet('Current Album');
   const sheetRange = currentAlbumSheet.getRange('C2:C5');
   const sheetValues = sheetRange.getValues();
 
@@ -285,7 +288,8 @@ function submit(e: SheetsFormSubmitEvent) {
  */
 function calculate() {
   const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-  const summarySheet = spreadsheet.getSheetByName('Summary');
+  const summarySheet =
+    spreadsheet.getSheetByName('Summary') || spreadsheet.insertSheet('Summary');
   const sheetRange = summarySheet.getRange(
     2,
     2,
@@ -297,9 +301,14 @@ function calculate() {
   let count;
 
   for (let i = 0; i < sheetValues.length; i += 1) {
-    sheet = spreadsheet.getSheetByName(
-      `${sheetValues[i][0]} — ${sheetValues[i][1]}`
-    );
+    const name = `${sheetValues[i][0]} — ${sheetValues[i][1]}`;
+    sheet = spreadsheet.getSheetByName(name);
+
+    if (!sheet) {
+      console.error(`${name} sheet not found!`);
+      continue;
+    }
+
     count = sheet.getLastRow() - 1;
 
     sheetValues[i][5] = count;
@@ -339,9 +348,10 @@ function getAverageForSheetColumn(
  * Generates a new order of submitters.
  */
 function generate() {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(
-    'Schedule'
-  );
+  const sheet =
+    SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Schedule') ||
+    SpreadsheetApp.getActiveSpreadsheet().insertSheet('Schedule');
+
   const namesRange = sheet.getRange('D2:D8');
   const names = namesRange.getValues();
 
@@ -370,9 +380,10 @@ function generate() {
  * Moves the pointer to the next submitter.
  */
 function next() {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet()
-    .getSheetByName('Schedule')
-    .activate();
+  const sheet = (
+    SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Schedule') ||
+    SpreadsheetApp.getActiveSpreadsheet().insertSheet('Schedule')
+  ).activate();
   const range = sheet.getRange('B2:B8');
   const values = range.getValues();
   let i;
@@ -401,9 +412,10 @@ function next() {
  * Moves the pointer to the previous submitter.
  */
 function back() {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet()
-    .getSheetByName('Schedule')
-    .activate();
+  const sheet = (
+    SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Schedule') ||
+    SpreadsheetApp.getActiveSpreadsheet().insertSheet('Schedule')
+  ).activate();
   const range = sheet.getRange('B2:B8');
   const values = range.getValues();
   let i;
